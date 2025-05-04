@@ -7,7 +7,7 @@ export default defineConfig({
     port: 3000,
   },
   build: {
-    outDir: 'build',
+    outDir: 'dist', // Mudando de 'build' para 'dist' para corresponder ao padrão do Netlify
   },
   preview: {
     port: 5000,
