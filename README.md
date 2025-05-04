@@ -1,97 +1,95 @@
-# atp2-firebase-app
+# tecnologias_dev_web - ATP2 Firebase App
 
-This is a React application that provides user registration and authentication using Firebase. The application consists of three main pages: Cadastro, Login, and Principal.
+Este é um aplicativo React que fornece cadastro e autenticação de usuários usando Firebase. A aplicação é composta por três páginas principais: Cadastro, Login e Principal.
 
-## Project Structure
+## Estrutura do Projeto
 
 ```
 atp2-firebase-app
 ├── public
-│   ├── index.html          # Main HTML file
-│   └── favicon.ico         # Favicon for the application
+│   ├── index.html          # Arquivo HTML principal
+│   └── favicon.ico         # Favicon para a aplicação
 ├── src
-│   ├── components          # Reusable components
-│   │   ├── Button.jsx      # Button component
-│   │   ├── Input.jsx       # Input component
-│   │   └── Navbar.jsx      # Navigation bar component
-│   ├── config              # Firebase configuration
-│   │   └── firebase.js     # Firebase initialization
-│   ├── contexts            # Context API for authentication
-│   │   └── AuthContext.jsx # Auth context provider
-│   ├── hooks               # Custom hooks
-│   │   └── useAuth.js      # Hook for authentication
-│   ├── pages               # Application pages
-│   │   ├── Cadastro        # Registration page
-│   │   │   └── index.jsx   # Cadastro component
-│   │   ├── Login           # Login page
-│   │   │   └── index.jsx   # Login component
-│   │   └── Principal       # Main user page
-│   │       └── index.jsx   # Principal component
-│   ├── routes              # Application routing
-│   │   └── AppRoutes.jsx   # Routes configuration
-│   ├── services            # Services for authentication and Firestore
-│   │   ├── auth.js         # Authentication functions
-│   │   └── firestore.js     # Firestore functions
-│   ├── styles              # CSS styles
-│   │   ├── global.css      # Global styles
-│   │   └── components.css   # Component-specific styles
-│   ├── utils               # Utility functions
-│   │   └── validators.js    # Input validation functions
-│   ├── App.jsx             # Main application component
-│   ├── index.jsx           # Entry point for the React application
-│   └── main.jsx            # React 18 root rendering
-├── .env                    # Environment variables
-├── .env.example            # Example environment variables
-├── .firebaserc            # Firebase project configuration
-├── .gitignore              # Files to ignore in version control
-├── firebase.json           # Firebase hosting configuration
-├── package.json            # npm configuration
-├── vite.config.js          # Vite build configuration
-└── README.md               # Project documentation
+│   ├── components          # Componentes reutilizáveis
+│   │   ├── Button.jsx      # Componente de botão
+│   │   ├── Input.jsx       # Componente de input
+│   │   └── Navbar.jsx      # Componente de barra de navegação
+│   ├── config              # Configuração do Firebase
+│   │   └── firebase.js     # Inicialização do Firebase
+│   ├── contexts            # Context API para autenticação
+│   │   └── AuthContext.jsx # Provider de contexto de autenticação
+│   ├── hooks               # Hooks personalizados
+│   │   └── useAuth.js      # Hook para autenticação
+│   ├── pages               # Páginas da aplicação
+│   │   ├── Cadastro        # Página de cadastro
+│   │   │   └── index.jsx   # Componente de Cadastro
+│   │   ├── Login           # Página de login
+│   │   │   └── index.jsx   # Componente de Login
+│   │   └── Principal       # Página principal do usuário
+│   │       └── index.jsx   # Componente Principal
+│   ├── routes              # Roteamento da aplicação
+│   │   └── AppRoutes.jsx   # Configuração de rotas
+│   ├── services            # Serviços para autenticação e Firestore
+│   │   ├── auth.js         # Funções de autenticação
+│   │   └── firestore.js    # Funções do Firestore
+│   ├── styles              # Estilos CSS
+│   │   ├── global.css      # Estilos globais
+│   │   └── components.css  # Estilos específicos de componentes
+│   ├── utils               # Funções utilitárias
+│   │   └── validators.js   # Funções de validação de inputs
+│   ├── App.jsx             # Componente principal da aplicação
+│   ├── index.jsx           # Ponto de entrada para a aplicação React
+│   └── main.jsx            # Renderização do root do React 18
+├── .env                    # Variáveis de ambiente
+├── .env.example            # Exemplo de variáveis de ambiente
+├── .firebaserc             # Configuração do projeto Firebase
+├── .gitignore              # Arquivos para ignorar no controle de versão
+├── firebase.json           # Configuração de hospedagem do Firebase
+├── package.json            # Configuração npm
+├── vite.config.js          # Configuração de build do Vite
+└── README.md               # Documentação do projeto
 ```
 
-## Features
+## Funcionalidades
 
-- **Cadastro Page**: Allows users to register with email, password, name, surname, and date of birth. User data is stored in Firebase Authentication and Firestore.
-- **Login Page**: Users can log in with their email and password. Successful login redirects to the Principal page.
-- **Principal Page**: Displays the logged-in user's name, surname, and date of birth.
+- **Página de Cadastro**: Permite aos usuários se registrarem com e-mail, senha, nome, sobrenome e data de nascimento. Os dados do usuário são armazenados no Firebase Authentication e Firestore.
+- **Página de Login**: Os usuários podem fazer login com seu e-mail e senha. O login bem-sucedido redireciona para a página Principal.
+- **Página Principal**: Exibe o nome, sobrenome e data de nascimento do usuário logado.
 
-## Getting Started
+## Como Iniciar
 
-1. Clone the repository:
+1. Clone o repositório:
    ```
-   git clone <repository-url>
-   ```
-
-2. Navigate to the project directory:
-   ```
-   cd atp2-firebase-app
+   git clone https://github.com/padilhajuliaa/tecnologias_dev_web.git
    ```
 
-3. Install dependencies:
+2. Navegue até o diretório do projeto:
+   ```
+   cd tecnologias_dev_web
+   ```
+
+3. Instale as dependências:
    ```
    npm install
    ```
 
-4. Set up Firebase:
-   - Create a Firebase project and configure authentication and Firestore.
-   - Update the `.env` file with your Firebase configuration.
+4. Configure o Firebase:
+   - Crie um projeto no Firebase e configure a autenticação e o Firestore.
+   - Atualize o arquivo `.env` com sua configuração do Firebase.
 
-5. Start the development server:
+5. Inicie o servidor de desenvolvimento:
    ```
-   npm run dev
+   npm start
    ```
 
-6. Build the application for production:
+6. Compile a aplicação para produção:
    ```
    npm run build
    ```
 
-7. Deploy to Firebase Hosting:
-   ```
-   firebase deploy
-   ```
+7. Faça o deploy para o Netlify:
+   - Siga as instruções no arquivo netlify-deploy.md
 
-## License
+## Licença
 
-This project is licensed under the MIT License.
+Este projeto está licenciado sob a Licença MIT.
