@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 
 // Configuração do Firebase com variáveis de ambiente
 const firebaseConfig = {
@@ -15,5 +15,24 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Habilitando persistência para melhorar a experiência offline
+// Isso também pode ajudar em problemas de conexão
+try {
+  enableIndexedDbPersistence(db)
+    .then(() => {
+      console.log("Firebase - Persistência offline habilitada com sucesso");
+    })
+    .catch((err) => {
+      console.error("Firebase - Erro ao habilitar persistência:", err);
+      if (err.code === 'failed-precondition') {
+        console.warn("Firebase - Múltiplas abas abertas. Persistência habilitada em apenas uma aba.");
+      } else if (err.code === 'unimplemented') {
+        console.warn("Firebase - Navegador não suporta persistência offline.");
+      }
+    });
+} catch (error) {
+  console.error("Firebase - Exceção ao configurar persistência:", error);
+}
 
 export default app;
