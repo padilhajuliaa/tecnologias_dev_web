@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
@@ -7,7 +8,12 @@ export default defineConfig({
     port: 3000,
   },
   build: {
-    outDir: 'dist', // Mudando de 'build' para 'dist' para corresponder ao padrão do Netlify
+    outDir: 'dist',
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+      },
+    },
   },
   preview: {
     port: 5000,
