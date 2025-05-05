@@ -1,73 +1,83 @@
 import { 
-  collection, 
   doc, 
   getDoc, 
   setDoc,
-  serverTimestamp 
+  Timestamp
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 
 // Coleção de usuários
 const USERS_COLLECTION = "users";
 
-// Função para salvar os dados do usuário no Firestore
+/**
+ * Salva os dados do usuário no Firestore
+ * Esta função foi completamente reescrita para garantir a persistência correta dos dados
+ */
 export const saveUserData = async (uid, userData) => {
   try {
-    console.log("[Firestore] Iniciando salvamento de dados para UID:", uid);
+    console.log("SaveUserData - Iniciando para UID:", uid);
     
-    // Valores padrão para campos que podem estar faltando
+    // Dados para serem salvos - formatados para garantir compatibilidade com Firestore
     const dataToSave = {
       nome: userData.nome || "",
       sobrenome: userData.sobrenome || "",
-      dataNascimento: userData.dataNascimento || "",
       email: userData.email || "",
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      dataNascimento: userData.dataNascimento || "",
+      createdAt: Timestamp.now(),
+      lastUpdated: Timestamp.now()
     };
     
-    console.log("[Firestore] Dados a serem salvos:", dataToSave);
+    console.log("SaveUserData - Dados formatados:", dataToSave);
     
-    // Usando uma função mais direta para garantir que os dados são salvos
+    // Usando setDoc diretamente com o UID como ID do documento
     const docRef = doc(db, USERS_COLLECTION, uid);
     await setDoc(docRef, dataToSave);
     
-    console.log("[Firestore] Dados salvos com sucesso!");
+    console.log("SaveUserData - Dados salvos com sucesso!");
     return { success: true, error: null };
   } catch (error) {
-    console.error("[Firestore] Erro ao salvar dados:", error);
+    console.error("SaveUserData - Erro:", error);
     return { success: false, error: error.message };
   }
 };
 
-// Função para buscar os dados do usuário pelo uid
+/**
+ * Busca os dados do usuário no Firestore
+ * Esta função foi completamente reescrita para garantir a recuperação correta dos dados
+ */
 export const getUserData = async (uid) => {
   try {
-    console.log("[Firestore] Buscando dados para UID:", uid);
+    console.log("GetUserData - Iniciando para UID:", uid);
+    
+    if (!uid) {
+      console.error("GetUserData - UID não fornecido");
+      return { data: null, error: "UID não fornecido" };
+    }
     
     const docRef = doc(db, USERS_COLLECTION, uid);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
       const data = docSnap.data();
-      console.log("[Firestore] Dados encontrados:", data);
+      console.log("GetUserData - Dados encontrados:", data);
       
-      // Construindo objeto com todos os campos necessários
-      const userData = {
-        id: docSnap.id,
-        nome: data.nome || "",
-        sobrenome: data.sobrenome || "",
-        dataNascimento: data.dataNascimento || "",
-        email: data.email || "",
-        createdAt: data.createdAt || null
+      return { 
+        data: {
+          id: uid,
+          nome: data.nome || "",
+          sobrenome: data.sobrenome || "",
+          email: data.email || "",
+          dataNascimento: data.dataNascimento || "",
+          createdAt: data.createdAt || null
+        }, 
+        error: null 
       };
-      
-      return { data: userData, error: null };
     } else {
-      console.log("[Firestore] Nenhum documento encontrado para o UID:", uid);
+      console.log("GetUserData - Nenhum documento encontrado");
       return { data: null, error: "Usuário não encontrado" };
     }
   } catch (error) {
-    console.error("[Firestore] Erro ao buscar dados:", error);
+    console.error("GetUserData - Erro:", error);
     return { data: null, error: error.message };
   }
 };

@@ -31,48 +31,50 @@ const Cadastro = () => {
     setError(null);
 
     try {
-      console.log("[Cadastro] Iniciando processo de cadastro para:", formData.email);
+      console.log("Cadastro - Iniciando cadastro para:", formData.email);
       
-      // Registra o usuário no Firebase Authentication
-      const { user, error } = await registerWithEmailAndPassword(formData.email, formData.password);
+      // 1. Registrar usuário na autenticação do Firebase
+      const { user, error: authError } = await registerWithEmailAndPassword(
+        formData.email, 
+        formData.password
+      );
       
-      if (error) {
-        console.error("[Cadastro] Erro na autenticação:", error);
-        throw new Error(error);
+      if (authError) {
+        console.error("Cadastro - Erro na autenticação:", authError);
+        throw new Error(authError);
       }
       
-      console.log("[Cadastro] Usuário autenticado com sucesso, UID:", user.uid);
-
-      // Salva os dados complementares no Firestore
-      const { nome, sobrenome, dataNascimento } = formData;
+      console.log("Cadastro - Usuário criado com sucesso. UID:", user.uid);
+      
+      // 2. Salvar dados adicionais no Firestore
       const userData = {
-        nome,
-        sobrenome,
-        dataNascimento,
+        nome: formData.nome,
+        sobrenome: formData.sobrenome,
+        dataNascimento: formData.dataNascimento,
         email: formData.email
       };
-
-      console.log("[Cadastro] Enviando dados para o Firestore:", userData);
-      const saveResult = await saveUserData(user.uid, userData);
       
-      if (saveResult.error) {
-        console.error("[Cadastro] Erro ao salvar dados:", saveResult.error);
-        throw new Error(saveResult.error);
+      console.log("Cadastro - Salvando dados no Firestore:", userData);
+      const { success, error: firestoreError } = await saveUserData(user.uid, userData);
+      
+      if (!success) {
+        console.error("Cadastro - Erro ao salvar dados:", firestoreError);
+        throw new Error(firestoreError || "Erro ao salvar seus dados");
       }
       
-      console.log("[Cadastro] Dados salvos com sucesso!");
-
-      // Tenta buscar os dados recém-salvos para garantir que tudo está correto
-      console.log("[Cadastro] Verificando se os dados foram salvos corretamente...");
+      console.log("Cadastro - Dados salvos com sucesso!");
+      
+      // 3. Atualizar o contexto de autenticação com os novos dados
+      console.log("Cadastro - Atualizando contexto com os dados do usuário");
       await refreshUserData();
       
-      console.log("[Cadastro] Redirecionando para a página principal...");
-      setLoading(false);
+      // 4. Redirecionar para a página principal
+      console.log("Cadastro - Redirecionando para página principal");
       navigate('/principal');
-      
     } catch (err) {
-      console.error("[Cadastro] Erro no processo de cadastro:", err);
-      setError(err.message || "Ocorreu um erro durante o cadastro. Tente novamente.");
+      console.error("Cadastro - Erro durante o processo:", err);
+      setError(err.message || "Ocorreu um erro durante o cadastro");
+    } finally {
       setLoading(false);
     }
   };

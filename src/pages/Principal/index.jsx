@@ -1,36 +1,58 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import '../../styles/global.css';
 
 const Principal = () => {
   const { user, userData, loading, refreshUserData } = useAuth();
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshAttempt, setRefreshAttempt] = useState(0);
 
-  // Função para tentar recarregar os dados do usuário
+  // Tentar carregar os dados do usuário se eles não estiverem disponíveis no primeiro carregamento
+  useEffect(() => {
+    const loadData = async () => {
+      // Se o usuário está autenticado mas não temos seus dados, tenta buscá-los
+      if (user && !userData && !refreshing && refreshAttempt < 3) {
+        console.log("Principal - Tentando buscar dados do usuário automaticamente");
+        setRefreshing(true);
+        await refreshUserData();
+        setRefreshing(false);
+        setRefreshAttempt(prev => prev + 1);
+      }
+    };
+
+    loadData();
+  }, [user, userData, refreshUserData, refreshing, refreshAttempt]);
+
+  // Handler para o botão de atualizar dados
   const handleRefreshData = async () => {
-    setIsRefreshing(true);
+    console.log("Principal - Botão de atualização clicado");
+    setRefreshing(true);
     await refreshUserData();
-    setIsRefreshing(false);
+    setRefreshing(false);
   };
 
-  // Redireciona para o login se não estiver autenticado
+  // Redirecionar para login se não estiver autenticado
   if (!loading && !user) {
+    console.log("Principal - Usuário não autenticado, redirecionando para login");
     return <Navigate to="/login" />;
   }
 
-  // Mostra mensagem de carregamento
-  if (loading || isRefreshing) {
-    return <div className="container loading">Carregando dados do usuário...</div>;
+  // Exibir mensagem de carregamento
+  if (loading || refreshing) {
+    return <div className="container loading">Carregando dados...</div>;
   }
 
-  // Formata a data de nascimento
+  // Função para formatar a data
   const formatarData = (dataString) => {
     if (!dataString) return 'Não informado';
+    
     try {
       const data = new Date(dataString);
-      return data.toLocaleDateString('pt-BR');
+      const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+      return data.toLocaleDateString('pt-BR', options);
     } catch (error) {
+      console.error("Principal - Erro ao formatar data:", error);
       return dataString || 'Não informado';
     }
   };
@@ -38,10 +60,12 @@ const Principal = () => {
   return (
     <div className="container">
       <h1>Página Principal</h1>
+      
       <div className="user-profile">
         <h2>Dados do Usuário</h2>
         
         {userData ? (
+          // Exibe os dados do usuário se estiverem disponíveis
           <div className="user-data">
             <p><strong>Nome:</strong> {userData.nome || 'Não informado'}</p>
             <p><strong>Sobrenome:</strong> {userData.sobrenome || 'Não informado'}</p>
@@ -49,6 +73,7 @@ const Principal = () => {
             <p><strong>E-mail:</strong> {userData.email || user?.email || 'Não informado'}</p>
           </div>
         ) : (
+          // Exibe mensagem de erro se os dados não estiverem disponíveis
           <div className="user-data error">
             <p>Nenhum dado encontrado para este usuário.</p>
             <p>Por favor, verifique se você completou seu cadastro corretamente.</p>
@@ -57,9 +82,9 @@ const Principal = () => {
             <button 
               className="refresh-button" 
               onClick={handleRefreshData} 
-              disabled={isRefreshing}
+              disabled={refreshing}
             >
-              {isRefreshing ? 'Atualizando...' : 'Atualizar dados'}
+              {refreshing ? 'Atualizando...' : 'Atualizar dados'}
             </button>
           </div>
         )}

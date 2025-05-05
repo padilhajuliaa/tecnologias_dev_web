@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { loginWithEmailAndPassword } from '../../services/auth';
+import { useAuth } from '../../hooks/useAuth';
 import '../../styles/global.css';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { refreshUserData } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,16 +20,27 @@ const Login = () => {
     setError(null);
 
     try {
+      console.log("Login - Tentando fazer login para:", email);
+      
       const { user, error } = await loginWithEmailAndPassword(email, password);
       
       if (error) {
+        console.error("Login - Erro na autenticação:", error);
         throw new Error(error);
       }
-
-      // Redireciona para a página principal após o login
+      
+      console.log("Login - Autenticação bem-sucedida. UID:", user.uid);
+      
+      // Buscar dados do usuário após login bem-sucedido
+      console.log("Login - Buscando dados do usuário");
+      await refreshUserData();
+      
+      // Redirecionar para a página principal
+      console.log("Login - Redirecionando para página principal");
       navigate('/principal');
     } catch (err) {
-      setError('Usuário não cadastrado ou senha incorreta.');
+      console.error("Login - Erro no processo:", err);
+      setError(err.message || 'Usuário não cadastrado ou senha incorreta.');
     } finally {
       setLoading(false);
     }
