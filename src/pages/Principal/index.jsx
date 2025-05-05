@@ -19,13 +19,6 @@ const Principal = () => {
     }
   }, [user, userData, refreshUserData, refreshing]);
 
-  // Handler para o botão de atualizar dados
-  const handleRefreshData = async () => {
-    setRefreshing(true);
-    await refreshUserData();
-    setRefreshing(false);
-  };
-
   // Redirecionar para login se não estiver autenticado
   if (!loading && !user) {
     return <Navigate to="/login" />;
@@ -66,14 +59,6 @@ const Principal = () => {
             <p><strong>Sobrenome:</strong> {userData.sobrenome || 'Não informado'}</p>
             <p><strong>Data de Nascimento:</strong> {formatarData(userData.dataNascimento)}</p>
             <p><strong>E-mail:</strong> {userData.email || user?.email || 'Não informado'}</p>
-            
-            <button 
-              className="refresh-button" 
-              onClick={handleRefreshData} 
-              disabled={refreshing}
-            >
-              {refreshing ? 'Atualizando...' : 'Atualizar dados'}
-            </button>
           </div>
         ) : (
           // Exibe mensagem se os dados não estiverem disponíveis
@@ -81,14 +66,6 @@ const Principal = () => {
             <p>Nenhum dado encontrado para este usuário.</p>
             <p>Por favor, verifique se você completou seu cadastro corretamente.</p>
             {user && <p><strong>E-mail autenticado:</strong> {user.email}</p>}
-            
-            <button 
-              className="refresh-button" 
-              onClick={handleRefreshData} 
-              disabled={refreshing}
-            >
-              {refreshing ? 'Atualizando...' : 'Atualizar dados'}
-            </button>
           </div>
         )}
       </div>
