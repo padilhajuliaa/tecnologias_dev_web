@@ -86,6 +86,31 @@ body {
   cursor: not-allowed;
 }
 
+/* Estilo para o botão de atualizar dados */
+.refresh-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 10px 0;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.refresh-button:hover {
+  background-color: #45a049;
+}
+
+.refresh-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
 /* Input Component */
 .input-container {
   display: flex;
@@ -112,6 +137,43 @@ body {
   outline: none;
   border-color: #4285f4;
   box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+/* Estilo para o container de erro */
+.user-data.error {
+  background-color: #fff8f8;
+  border-left: 4px solid #ff6b6b;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+/* Estilo para mensagens de carregamento mais atraentes */
+.container.loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1.2rem;
+  color: #666;
+  position: relative;
+}
+
+.container.loading:after {
+  content: "";
+  width: 40px;
+  height: 40px;
+  margin: 20px auto;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #4285f4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: block;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Media Queries para Responsividade */
