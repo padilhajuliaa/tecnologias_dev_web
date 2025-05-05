@@ -1,37 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { getUserData } from '../../services/firestore';
 import '../../styles/global.css';
 
 const Principal = () => {
-  const { user, loading } = useAuth();
-  const [userData, setUserData] = useState(null);
-  const [loadingData, setLoadingData] = useState(true);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (user && user.uid) {
-        setLoadingData(true);
-        try {
-          const { data, error } = await getUserData(user.uid);
-          if (data) {
-            setUserData(data);
-          }
-        } catch (error) {
-          console.error('Erro ao buscar dados do usuário:', error);
-        } finally {
-          setLoadingData(false);
-        }
-      }
-    };
-
-    if (user) {
-      fetchUserData();
-    } else {
-      setLoadingData(false);
-    }
-  }, [user]);
+  const { user, userData, loading } = useAuth();
 
   // Redireciona para o login se não estiver autenticado
   if (!loading && !user) {
@@ -39,7 +12,7 @@ const Principal = () => {
   }
 
   // Mostra mensagem de carregamento enquanto os dados estão sendo buscados
-  if (loading || loadingData) {
+  if (loading) {
     return <div className="container loading">Carregando...</div>;
   }
 

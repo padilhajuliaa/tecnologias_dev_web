@@ -1,6 +1,6 @@
 # URL do deploy no Netlify
 
-https://seu-projeto-atp2-firebase.netlify.app
+https://seu-site-nome-aleatorio.netlify.app
 
-# Substitua a URL acima pela URL gerada após o deploy no Netlify
-# Este arquivo deve ser incluído na entrega junto com o código do projeto
+# Substitua a URL acima pela URL real gerada pelo Netlify após o deploy bem-sucedido
+# Este arquivo deve ser incluído na entrega do projeto
