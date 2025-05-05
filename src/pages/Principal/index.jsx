@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import '../../styles/global.css';
@@ -7,27 +7,19 @@ const Principal = () => {
   const { user, userData, loading, refreshUserData } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Quando a página carrega, tenta buscar os dados do usuário novamente
-  useEffect(() => {
-    const loadUserData = async () => {
-      if (user && !userData) {
-        setIsRefreshing(true);
-        console.log("Tentando buscar dados novamente na Principal");
-        await refreshUserData();
-        setIsRefreshing(false);
-      }
-    };
-
-    loadUserData();
-  }, [user, userData, refreshUserData]);
+  // Função para tentar recarregar os dados do usuário
+  const handleRefreshData = async () => {
+    setIsRefreshing(true);
+    await refreshUserData();
+    setIsRefreshing(false);
+  };
 
   // Redireciona para o login se não estiver autenticado
   if (!loading && !user) {
-    console.log("Usuário não autenticado, redirecionando para login");
     return <Navigate to="/login" />;
   }
 
-  // Mostra mensagem de carregamento enquanto os dados estão sendo buscados
+  // Mostra mensagem de carregamento
   if (loading || isRefreshing) {
     return <div className="container loading">Carregando dados do usuário...</div>;
   }
@@ -39,15 +31,8 @@ const Principal = () => {
       const data = new Date(dataString);
       return data.toLocaleDateString('pt-BR');
     } catch (error) {
-      console.error('Erro ao formatar data:', error);
       return dataString || 'Não informado';
     }
-  };
-
-  const handleRefreshData = async () => {
-    setIsRefreshing(true);
-    await refreshUserData();
-    setIsRefreshing(false);
   };
 
   return (
@@ -55,6 +40,7 @@ const Principal = () => {
       <h1>Página Principal</h1>
       <div className="user-profile">
         <h2>Dados do Usuário</h2>
+        
         {userData ? (
           <div className="user-data">
             <p><strong>Nome:</strong> {userData.nome || 'Não informado'}</p>
@@ -67,6 +53,7 @@ const Principal = () => {
             <p>Nenhum dado encontrado para este usuário.</p>
             <p>Por favor, verifique se você completou seu cadastro corretamente.</p>
             {user && <p><strong>E-mail autenticado:</strong> {user.email}</p>}
+            
             <button 
               className="refresh-button" 
               onClick={handleRefreshData} 

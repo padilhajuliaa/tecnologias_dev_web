@@ -4,10 +4,12 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { registerWithEmailAndPassword } from '../../services/auth';
 import { saveUserData } from '../../services/firestore';
+import { useAuth } from '../../hooks/useAuth';
 import '../../styles/global.css';
 
 const Cadastro = () => {
   const navigate = useNavigate();
+  const { refreshUserData } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -29,17 +31,17 @@ const Cadastro = () => {
     setError(null);
 
     try {
-      console.log("Iniciando cadastro para:", formData.email);
+      console.log("[Cadastro] Iniciando processo de cadastro para:", formData.email);
       
       // Registra o usuário no Firebase Authentication
       const { user, error } = await registerWithEmailAndPassword(formData.email, formData.password);
       
       if (error) {
-        console.error("Erro na autenticação:", error);
+        console.error("[Cadastro] Erro na autenticação:", error);
         throw new Error(error);
       }
       
-      console.log("Usuário autenticado com sucesso, UID:", user.uid);
+      console.log("[Cadastro] Usuário autenticado com sucesso, UID:", user.uid);
 
       // Salva os dados complementares no Firestore
       const { nome, sobrenome, dataNascimento } = formData;
@@ -47,28 +49,29 @@ const Cadastro = () => {
         nome,
         sobrenome,
         dataNascimento,
-        email: formData.email,
-        createdAt: new Date().toISOString() // Convertendo para string para garantir compatibilidade
+        email: formData.email
       };
 
-      console.log("Salvando dados no Firestore:", userData);
+      console.log("[Cadastro] Enviando dados para o Firestore:", userData);
       const saveResult = await saveUserData(user.uid, userData);
       
       if (saveResult.error) {
-        console.error("Erro ao salvar dados:", saveResult.error);
+        console.error("[Cadastro] Erro ao salvar dados:", saveResult.error);
         throw new Error(saveResult.error);
       }
       
-      console.log("Dados salvos com sucesso, redirecionando...");
+      console.log("[Cadastro] Dados salvos com sucesso!");
 
-      // Aguarda um pequeno tempo para garantir que os dados foram persistidos
-      setTimeout(() => {
-        setLoading(false);
-        navigate('/principal');
-      }, 1000);
+      // Tenta buscar os dados recém-salvos para garantir que tudo está correto
+      console.log("[Cadastro] Verificando se os dados foram salvos corretamente...");
+      await refreshUserData();
+      
+      console.log("[Cadastro] Redirecionando para a página principal...");
+      setLoading(false);
+      navigate('/principal');
       
     } catch (err) {
-      console.error("Erro no processo de cadastro:", err);
+      console.error("[Cadastro] Erro no processo de cadastro:", err);
       setError(err.message || "Ocorreu um erro durante o cadastro. Tente novamente.");
       setLoading(false);
     }

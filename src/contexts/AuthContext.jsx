@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { auth } from '../config/firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { getUserData } from "../services/firestore";
 
 export const AuthContext = createContext({});
@@ -12,20 +12,20 @@ export const AuthProvider = ({ children }) => {
 
   // Função para buscar dados do usuário do Firestore
   const fetchUserData = useCallback(async (uid) => {
-    console.log("Buscando dados do usuário com UID:", uid);
+    console.log("[AuthContext] Buscando dados do usuário com UID:", uid);
     try {
       const { data, error } = await getUserData(uid);
       if (data) {
-        console.log("Dados do usuário obtidos com sucesso:", data);
+        console.log("[AuthContext] Dados do usuário carregados com sucesso:", data);
         setUserData(data);
         return data;
       } else {
-        console.error("Erro ao buscar dados do usuário:", error);
+        console.error("[AuthContext] Erro ao buscar dados do usuário:", error);
         setUserData(null);
         return null;
       }
     } catch (error) {
-      console.error("Exceção ao buscar dados do usuário:", error);
+      console.error("[AuthContext] Exceção ao buscar dados do usuário:", error);
       setUserData(null);
       return null;
     }
@@ -33,14 +33,14 @@ export const AuthProvider = ({ children }) => {
 
   // Efeito para monitorar mudanças de autenticação
   useEffect(() => {
-    console.log("Configurando observador de autenticação");
+    console.log("[AuthContext] Configurando observador de autenticação");
     setLoading(true);
     
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      console.log("Estado de autenticação alterado:", currentUser ? `Usuário ${currentUser.uid} logado` : "Nenhum usuário logado");
+      console.log("[AuthContext] Estado de autenticação alterado:", currentUser ? `Usuário ${currentUser.uid} logado` : "Nenhum usuário logado");
       setUser(currentUser);
       
-      if (currentUser) {
+      if (currentUser && currentUser.uid) {
         // Busca os dados adicionais do usuário no Firestore
         await fetchUserData(currentUser.uid);
       } else {
@@ -51,73 +51,30 @@ export const AuthProvider = ({ children }) => {
     });
 
     return () => {
-      console.log("Limpando observador de autenticação");
+      console.log("[AuthContext] Limpando observador de autenticação");
       unsubscribe();
     };
   }, [fetchUserData]);
 
-  // Função para fazer cadastro
-  const signup = async (email, password) => {
-    try {
-      console.log("Iniciando cadastro com email:", email);
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("Cadastro realizado com sucesso");
-      return { user: result.user, error: null };
-    } catch (error) {
-      console.error("Erro no cadastro:", error);
-      return { user: null, error: error.message };
-    }
-  };
-
-  // Função para fazer login
-  const login = async (email, password) => {
-    try {
-      console.log("Iniciando login com email:", email);
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      console.log("Login realizado com sucesso");
-      
-      // Buscando dados do usuário após login bem-sucedido
-      await fetchUserData(result.user.uid);
-      
-      return { user: result.user, error: null };
-    } catch (error) {
-      console.error("Erro no login:", error);
-      return { user: null, error: error.message };
-    }
-  };
-
-  // Função para fazer logout
-  const logout = async () => {
-    try {
-      await signOut(auth);
-      console.log("Logout realizado com sucesso");
-      setUserData(null);
-      return { success: true, error: null };
-    } catch (error) {
-      console.error("Erro no logout:", error);
-      return { success: false, error: error.message };
-    }
-  };
-
   // Função para recarregar os dados do usuário atual
   const refreshUserData = async () => {
     if (user && user.uid) {
-      console.log("Recarregando dados do usuário...");
+      console.log("[AuthContext] Recarregando dados do usuário...");
       return await fetchUserData(user.uid);
     }
     return null;
   };
 
+  // Valor do contexto
+  const value = {
+    user,
+    userData,
+    loading,
+    refreshUserData
+  };
+
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      userData, 
-      loading, 
-      signup, 
-      login, 
-      logout,
-      refreshUserData
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
