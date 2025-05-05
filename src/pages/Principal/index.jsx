@@ -7,13 +7,14 @@ const Principal = () => {
   const { user, userData, loading, refreshUserData } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [refreshAttempt, setRefreshAttempt] = useState(0);
+  const [manualRefresh, setManualRefresh] = useState(false);
 
   // Tentar carregar os dados do usuário se eles não estiverem disponíveis no primeiro carregamento
   useEffect(() => {
     const loadData = async () => {
       // Se o usuário está autenticado mas não temos seus dados, tenta buscá-los
       if (user && !userData && !refreshing && refreshAttempt < 3) {
-        console.log("Principal - Tentando buscar dados do usuário automaticamente");
+        console.log("Principal - Tentativa", refreshAttempt + 1, "de buscar dados automaticamente");
         setRefreshing(true);
         await refreshUserData();
         setRefreshing(false);
@@ -24,10 +25,27 @@ const Principal = () => {
     loadData();
   }, [user, userData, refreshUserData, refreshing, refreshAttempt]);
 
+  // Este efeito é executado apenas uma vez quando o componente é montado
+  // para garantir que os dados sejam atualizados mesmo se já existirem
+  useEffect(() => {
+    const initialLoad = async () => {
+      if (user && !manualRefresh) {
+        console.log("Principal - Atualizando dados na montagem do componente");
+        setRefreshing(true);
+        await refreshUserData();
+        setRefreshing(false);
+        setManualRefresh(true);
+      }
+    };
+
+    initialLoad();
+  }, [user, refreshUserData]);
+
   // Handler para o botão de atualizar dados
   const handleRefreshData = async () => {
     console.log("Principal - Botão de atualização clicado");
     setRefreshing(true);
+    setManualRefresh(true);
     await refreshUserData();
     setRefreshing(false);
   };
@@ -57,6 +75,14 @@ const Principal = () => {
     }
   };
 
+  // Debug information to help troubleshoot issues
+  console.log("Principal - Estado atual:", {
+    userExists: !!user,
+    userDataExists: !!userData,
+    uid: user?.uid,
+    email: user?.email
+  });
+
   return (
     <div className="container">
       <h1>Página Principal</h1>
@@ -71,6 +97,14 @@ const Principal = () => {
             <p><strong>Sobrenome:</strong> {userData.sobrenome || 'Não informado'}</p>
             <p><strong>Data de Nascimento:</strong> {formatarData(userData.dataNascimento)}</p>
             <p><strong>E-mail:</strong> {userData.email || user?.email || 'Não informado'}</p>
+            
+            <button 
+              className="refresh-button" 
+              onClick={handleRefreshData} 
+              disabled={refreshing}
+            >
+              {refreshing ? 'Atualizando...' : 'Atualizar dados'}
+            </button>
           </div>
         ) : (
           // Exibe mensagem de erro se os dados não estiverem disponíveis

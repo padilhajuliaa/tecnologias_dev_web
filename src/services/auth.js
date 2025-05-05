@@ -17,6 +17,7 @@ export const registerWithEmailAndPassword = async (email, password) => {
       return { user: null, error: "E-mail e senha são obrigatórios" };
     }
     
+    // Criando usuário no Firebase Authentication
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     console.log("Auth - Usuário registrado com sucesso. UID:", userCredential.user.uid);
     

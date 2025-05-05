@@ -15,6 +15,11 @@ export const AuthProvider = ({ children }) => {
   const fetchUserData = async (uid) => {
     console.log("AuthContext - Buscando dados do usuário:", uid);
     
+    if (!uid) {
+      console.error("AuthContext - UID não fornecido para fetchUserData");
+      return null;
+    }
+    
     try {
       const { data, error } = await getUserData(uid);
       
@@ -23,7 +28,7 @@ export const AuthProvider = ({ children }) => {
         setUserData(data);
         return data;
       } else {
-        console.error("AuthContext - Erro ou nenhum dado encontrado:", error);
+        console.error("AuthContext - Nenhum dado encontrado:", error);
         setUserData(null);
         return null;
       }
@@ -34,18 +39,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Função para recarregar os dados do usuário
+  // Função para recarregar os dados do usuário - exportada para outros componentes
   const refreshUserData = async () => {
     if (user && user.uid) {
-      console.log("AuthContext - Recarregando dados do usuário");
+      console.log("AuthContext - Atualizando dados do usuário:", user.uid);
       return await fetchUserData(user.uid);
+    } else {
+      console.log("AuthContext - Não é possível atualizar: usuário não autenticado");
+      return null;
     }
-    return null;
   };
 
-  // Configurar o listener de autenticação quando o componente for montado
+  // Observador de autenticação - executa quando o componente é montado
   useEffect(() => {
-    console.log("AuthContext - Configurando observador de autenticação");
+    console.log("AuthContext - Inicializando observador de autenticação");
     setLoading(true);
     
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -55,17 +62,22 @@ export const AuthProvider = ({ children }) => {
       setUser(currentUser);
       
       if (currentUser) {
+        // Quando um usuário é detectado, buscamos seus dados
         await fetchUserData(currentUser.uid);
       } else {
+        // Quando não há usuário, limpamos os dados
         setUserData(null);
       }
       
       setLoading(false);
     });
 
-    // Limpar o listener quando o componente for desmontado
-    return () => unsubscribe();
-  }, []);
+    // Limpeza do observador quando o componente é desmontado
+    return () => {
+      console.log("AuthContext - Removendo observador de autenticação");
+      unsubscribe();
+    };
+  }, []); // Dependência vazia para executar apenas na montagem
 
   // Valor fornecido pelo contexto
   const value = {

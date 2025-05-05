@@ -68,13 +68,19 @@ const Cadastro = () => {
       console.log("Cadastro - Atualizando contexto com os dados do usuário");
       await refreshUserData();
       
-      // 4. Redirecionar para a página principal
-      console.log("Cadastro - Redirecionando para página principal");
-      navigate('/principal');
+      // 4. Importante: Adicionando um pequeno atraso antes de navegar
+      // Isso garante que o contexto tenha tempo de atualizar
+      console.log("Cadastro - Redirecionando para página principal após breve espera");
+      
+      // Espera 500ms antes de redirecionar para a página principal
+      setTimeout(() => {
+        setLoading(false);
+        navigate('/principal');
+      }, 500);
+      
     } catch (err) {
       console.error("Cadastro - Erro durante o processo:", err);
       setError(err.message || "Ocorreu um erro durante o cadastro");
-    } finally {
       setLoading(false);
     }
   };
