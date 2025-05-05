@@ -2,14 +2,14 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
+// Configuração do Firebase com variáveis de ambiente
 const firebaseConfig = {
-  apiKey: "AIzaSyDmb_HZaOOe6ajtWEq58IRvIy0uoDBEbzU",
-  authDomain: "atp2-firebase-app.firebaseapp.com",
-  projectId: "atp2-firebase-app",
-  storageBucket: "atp2-firebase-app.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef123456789012345",
-  measurementId: "G-ABCDEF1234"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);
