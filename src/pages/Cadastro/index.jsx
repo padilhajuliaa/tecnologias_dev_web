@@ -31,8 +31,6 @@ const Cadastro = () => {
     setError(null);
 
     try {
-      console.log("Cadastro - Iniciando cadastro para:", formData.email);
-      
       // 1. Registrar usuário na autenticação do Firebase
       const { user, error: authError } = await registerWithEmailAndPassword(
         formData.email, 
@@ -40,11 +38,12 @@ const Cadastro = () => {
       );
       
       if (authError) {
-        console.error("Cadastro - Erro na autenticação:", authError);
         throw new Error(authError);
       }
       
-      console.log("Cadastro - Usuário criado com sucesso. UID:", user.uid);
+      if (!user || !user.uid) {
+        throw new Error("Erro ao criar usuário: dados de usuário incompletos");
+      }
       
       // 2. Salvar dados adicionais no Firestore
       const userData = {
@@ -54,32 +53,24 @@ const Cadastro = () => {
         email: formData.email
       };
       
-      console.log("Cadastro - Salvando dados no Firestore:", userData);
       const { success, error: firestoreError } = await saveUserData(user.uid, userData);
       
       if (!success) {
-        console.error("Cadastro - Erro ao salvar dados:", firestoreError);
         throw new Error(firestoreError || "Erro ao salvar seus dados");
       }
       
-      console.log("Cadastro - Dados salvos com sucesso!");
-      
       // 3. Atualizar o contexto de autenticação com os novos dados
-      console.log("Cadastro - Atualizando contexto com os dados do usuário");
       await refreshUserData();
       
-      // 4. Importante: Adicionando um pequeno atraso antes de navegar
-      // Isso garante que o contexto tenha tempo de atualizar
-      console.log("Cadastro - Redirecionando para página principal após breve espera");
-      
-      // Espera 500ms antes de redirecionar para a página principal
+      // 4. Redirecionar para a página principal após um breve atraso
+      // para garantir que o contexto seja atualizado
       setTimeout(() => {
         setLoading(false);
         navigate('/principal');
-      }, 500);
+      }, 1000);
       
     } catch (err) {
-      console.error("Cadastro - Erro durante o processo:", err);
+      console.error("Erro durante o cadastro:", err);
       setError(err.message || "Ocorreu um erro durante o cadastro");
       setLoading(false);
     }
@@ -107,7 +98,7 @@ const Cadastro = () => {
           name="password"
           value={formData.password}
           onChange={handleChange}
-          placeholder="Senha"
+          placeholder="Senha (mínimo de 6 caracteres)"
           label="Senha"
           required
         />

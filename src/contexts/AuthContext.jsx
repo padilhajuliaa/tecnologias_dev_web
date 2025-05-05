@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { auth } from '../config/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getUserData } from "../services/firestore";
@@ -10,62 +10,63 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState(null);
 
   // Função para buscar os dados do usuário do Firestore
   const fetchUserData = async (uid) => {
-    console.log("AuthContext - Buscando dados do usuário:", uid);
+    setAuthError(null);
     
     if (!uid) {
-      console.error("AuthContext - UID não fornecido para fetchUserData");
+      setAuthError("UID não fornecido");
       return null;
     }
     
     try {
       const { data, error } = await getUserData(uid);
       
+      if (error) {
+        setAuthError(error);
+      }
+      
       if (data) {
-        console.log("AuthContext - Dados encontrados:", data);
         setUserData(data);
         return data;
       } else {
-        console.error("AuthContext - Nenhum dado encontrado:", error);
         setUserData(null);
+        if (!authError) setAuthError(error || "Dados não encontrados");
         return null;
       }
     } catch (error) {
-      console.error("AuthContext - Exceção ao buscar dados:", error);
       setUserData(null);
+      setAuthError(error.message || "Erro desconhecido ao buscar dados");
       return null;
     }
   };
 
-  // Função para recarregar os dados do usuário - exportada para outros componentes
+  // Função para recarregar os dados do usuário
   const refreshUserData = async () => {
     if (user && user.uid) {
-      console.log("AuthContext - Atualizando dados do usuário:", user.uid);
       return await fetchUserData(user.uid);
     } else {
-      console.log("AuthContext - Não é possível atualizar: usuário não autenticado");
+      setAuthError("Usuário não autenticado");
       return null;
     }
   };
 
-  // Observador de autenticação - executa quando o componente é montado
+  // Observador de autenticação
   useEffect(() => {
-    console.log("AuthContext - Inicializando observador de autenticação");
     setLoading(true);
     
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      console.log("AuthContext - Estado de autenticação alterado:", 
-                 currentUser ? `Usuário logado: ${currentUser.uid}` : "Nenhum usuário logado");
-      
       setUser(currentUser);
       
       if (currentUser) {
-        // Quando um usuário é detectado, buscamos seus dados
-        await fetchUserData(currentUser.uid);
+        try {
+          await fetchUserData(currentUser.uid);
+        } catch (dataError) {
+          setAuthError(dataError.message);
+        }
       } else {
-        // Quando não há usuário, limpamos os dados
         setUserData(null);
       }
       
@@ -73,17 +74,15 @@ export const AuthProvider = ({ children }) => {
     });
 
     // Limpeza do observador quando o componente é desmontado
-    return () => {
-      console.log("AuthContext - Removendo observador de autenticação");
-      unsubscribe();
-    };
-  }, []); // Dependência vazia para executar apenas na montagem
+    return () => unsubscribe();
+  }, []);
 
   // Valor fornecido pelo contexto
   const value = {
     user,
     userData,
     loading,
+    authError,
     refreshUserData
   };
 

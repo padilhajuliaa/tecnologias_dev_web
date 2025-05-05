@@ -6,53 +6,28 @@ import '../../styles/global.css';
 const Principal = () => {
   const { user, userData, loading, refreshUserData } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
-  const [refreshAttempt, setRefreshAttempt] = useState(0);
-  const [manualRefresh, setManualRefresh] = useState(false);
 
-  // Tentar carregar os dados do usuário se eles não estiverem disponíveis no primeiro carregamento
+  // Buscar dados do usuário ao carregar a página
   useEffect(() => {
-    const loadData = async () => {
-      // Se o usuário está autenticado mas não temos seus dados, tenta buscá-los
-      if (user && !userData && !refreshing && refreshAttempt < 3) {
-        console.log("Principal - Tentativa", refreshAttempt + 1, "de buscar dados automaticamente");
+    if (user && !userData && !refreshing) {
+      const loadData = async () => {
         setRefreshing(true);
         await refreshUserData();
         setRefreshing(false);
-        setRefreshAttempt(prev => prev + 1);
-      }
-    };
-
-    loadData();
-  }, [user, userData, refreshUserData, refreshing, refreshAttempt]);
-
-  // Este efeito é executado apenas uma vez quando o componente é montado
-  // para garantir que os dados sejam atualizados mesmo se já existirem
-  useEffect(() => {
-    const initialLoad = async () => {
-      if (user && !manualRefresh) {
-        console.log("Principal - Atualizando dados na montagem do componente");
-        setRefreshing(true);
-        await refreshUserData();
-        setRefreshing(false);
-        setManualRefresh(true);
-      }
-    };
-
-    initialLoad();
-  }, [user, refreshUserData]);
+      };
+      loadData();
+    }
+  }, [user, userData, refreshUserData, refreshing]);
 
   // Handler para o botão de atualizar dados
   const handleRefreshData = async () => {
-    console.log("Principal - Botão de atualização clicado");
     setRefreshing(true);
-    setManualRefresh(true);
     await refreshUserData();
     setRefreshing(false);
   };
 
   // Redirecionar para login se não estiver autenticado
   if (!loading && !user) {
-    console.log("Principal - Usuário não autenticado, redirecionando para login");
     return <Navigate to="/login" />;
   }
 
@@ -67,21 +42,15 @@ const Principal = () => {
     
     try {
       const data = new Date(dataString);
-      const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-      return data.toLocaleDateString('pt-BR', options);
+      return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).format(data);
     } catch (error) {
-      console.error("Principal - Erro ao formatar data:", error);
       return dataString || 'Não informado';
     }
   };
-
-  // Debug information to help troubleshoot issues
-  console.log("Principal - Estado atual:", {
-    userExists: !!user,
-    userDataExists: !!userData,
-    uid: user?.uid,
-    email: user?.email
-  });
 
   return (
     <div className="container">
@@ -107,7 +76,7 @@ const Principal = () => {
             </button>
           </div>
         ) : (
-          // Exibe mensagem de erro se os dados não estiverem disponíveis
+          // Exibe mensagem se os dados não estiverem disponíveis
           <div className="user-data error">
             <p>Nenhum dado encontrado para este usuário.</p>
             <p>Por favor, verifique se você completou seu cadastro corretamente.</p>

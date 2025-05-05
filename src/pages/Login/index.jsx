@@ -20,26 +20,22 @@ const Login = () => {
     setError(null);
 
     try {
-      console.log("Login - Tentando fazer login para:", email);
-      
       const { user, error } = await loginWithEmailAndPassword(email, password);
       
       if (error) {
-        console.error("Login - Erro na autenticação:", error);
         throw new Error(error);
       }
       
-      console.log("Login - Autenticação bem-sucedida. UID:", user.uid);
+      if (!user) {
+        throw new Error("Erro ao autenticar: dados de usuário incompletos");
+      }
       
       // Buscar dados do usuário após login bem-sucedido
-      console.log("Login - Buscando dados do usuário");
       await refreshUserData();
       
       // Redirecionar para a página principal
-      console.log("Login - Redirecionando para página principal");
       navigate('/principal');
     } catch (err) {
-      console.error("Login - Erro no processo:", err);
       setError(err.message || 'Usuário não cadastrado ou senha incorreta.');
     } finally {
       setLoading(false);
